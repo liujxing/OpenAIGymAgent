@@ -1,13 +1,10 @@
 import numpy as np
 import random
-from scheduler import LinearScheduler
 
 class QTrainer(object):
 	def __init__(self, env, exploration_scheduler, lr_scheduler):
 		self.env = env
 		self._counter = 0
-		#self.q_value = np.random.uniform(size=(self.env.observation_space.n, self.env.action_space.n))
-		#self.q_value_old = np.random.uniform(size=(self.env.observation_space.n, self.env.action_space.n))
 		self.q_value = np.zeros((self.env.observation_space.n, self.env.action_space.n))
 		self.q_value_old = np.zeros((self.env.observation_space.n, self.env.action_space.n))
 		self.exploration_scheduler = exploration_scheduler
@@ -61,10 +58,25 @@ class QTrainer(object):
 			self.trainStep()
 			diff = self.calculateQChange()
 			i+=1
-			print(i, diff)
 
 	def retrivePolicy(self):
 		return np.argmax(self.q_value, axis=1)
+
+	def testPolicy(self, num_episode):
+		optimum_actions = self.retrivePolicy()
+		total_reward = 0
+		for _ in range(num_episode):
+			state = self.env.reset()
+			done = False
+			while not done:
+				action = optimum_actions[state]
+				state, reward, done, info = self.env.step(action)
+				total_reward += reward
+		return total_reward / num_episode
+
+
+
+
 
 
 
